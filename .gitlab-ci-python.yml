@@ -26,7 +26,7 @@ stages:
 test:
   stage: test
   before_script:
-    - apt-get install -y make g++ libxml2-dev libxslt-dev libffi-dev libssl-dev
+    - apt-get install -y make g++ libxml2-dev libxslt-dev libffi-dev libssl-dev cvs git maven
     - python -V
     - pip install virtualenv
     - virtualenv venv
