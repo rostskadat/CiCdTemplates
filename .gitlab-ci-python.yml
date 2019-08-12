@@ -26,7 +26,11 @@ stages:
 test:
   stage: test
   before_script:
-    - apt-get install -y make g++ libxml2-dev libxslt-dev libffi-dev libssl-dev cvs git maven
+    - apt-get install -y make g++ libxml2-dev libxslt-dev libffi-dev libssl-dev
+    - echo "deb http://deb.debian.org/debian buster contrib non-free" >> /etc/apt/sources.list
+    - apt-get update
+    - apt-get install -y cvs maven musl-dev
+    - ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
     - python -V
     - pip install virtualenv
     - virtualenv venv
