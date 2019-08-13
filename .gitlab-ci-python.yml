@@ -1,12 +1,21 @@
-# This file is a template, and might need editing before it works on your project.
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-image: python:3.6
+#
+# Reference: https://docs.gitlab.com/ee/ci/yaml/#include
+#
+# BEWARE: The syntax below is only available from 11.7 and therefore can not be used
+# - project: 'my-group/my-project'
+#   file: '/templates/.gitlab-ci-template.yml'
+#include:
+#  - 'https://raw.githubusercontent.com/rostskadat/CiCdTemplates/master/.gitlab-ci-python.yml'
+
+# 
+image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  TWINE_USERNAME: $PYPI_USERNAME
+  TWINE_PASSWORD: $PYPI_PASSWORD
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -26,17 +35,10 @@ stages:
 test:
   stage: test
   before_script:
-    - apt-get install -y make g++ libxml2-dev libxslt-dev libffi-dev libssl-dev
-    - echo "deb http://deb.debian.org/debian buster contrib non-free" >> /etc/apt/sources.list
-    - apt-get update
-    - apt-get install -y cvs maven musl-dev
-    - ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
-    - python -V
-    - pip install virtualenv
     - virtualenv venv
     - source venv/bin/activate
-    - pip install --requirement test-requirements.txt
-    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+    - pip install --no-cache --upgrade --requirement test-requirements.txt
+    - pip install --no-cache --upgrade --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - coverage run --source=src setup.py test
     - coverage html
@@ -65,15 +67,6 @@ package_sdist:
 
 deploy_staging:
   stage: deploy
-  variables:
-    TWINE_USERNAME: $PYPI_USERNAME
-    TWINE_PASSWORD: $PYPI_PASSWORD
-  before_script:
-    - python -V
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install twine
   script:
     - twine upload --repository-url $PYPI_URL dist/*
   except:
@@ -81,15 +74,6 @@ deploy_staging:
 
 deploy_production:
   stage: deploy
-  variables:
-    TWINE_USERNAME: $PYPI_USERNAME
-    TWINE_PASSWORD: $PYPI_PASSWORD
-  before_script:
-    - python -V
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install twine
   script:
     - twine upload --repository-url $PYPI_URL dist/*
   only:
