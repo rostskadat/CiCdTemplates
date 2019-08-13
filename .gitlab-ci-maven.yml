@@ -66,6 +66,15 @@ coverage:
       - target/jacoco.exec
     expire_in: 1 day
 
+coverage:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS pmd:pmd
+  artifacts:
+    paths:
+      - target/pmd.xml
+    expire_in: 1 day
+
 sonar:
   stage: analysis
   script:
