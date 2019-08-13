@@ -75,6 +75,15 @@ pmd:
       - target/pmd.xml
     expire_in: 1 day
 
+checkstyle:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS checkstyle:checkstyle
+  artifacts:
+    paths:
+      - target/checkstyle-result.xml
+    expire_in: 1 day
+
 sonar:
   stage: analysis
   script:
