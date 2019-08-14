@@ -1,0 +1,19 @@
+#
+# Reference: https://docs.gitlab.com/ee/ci/yaml/#include
+#
+# BEWARE: The syntax below is only available from 11.7 and therefore can not be used
+# - project: 'my-group/my-project'
+#   file: '/templates/.gitlab-ci-template.yml'
+#include:
+#  - 'https://raw.githubusercontent.com/rostskadat/CiCdTemplates/master/.gitlab-ci-python.yml'
+
+# 
+image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
