@@ -42,7 +42,7 @@ build:
   script:
     - coverage run --source=src setup.py test
     - coverage xml
-    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
+    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
     - coverage report --show-missing
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
 
