@@ -35,7 +35,7 @@ stages:
 build:
   stage: build
   before_script:
-    - virtualenv venv
+    - python -m virtualenv venv
     - source venv/bin/activate
     - pip install --no-cache --upgrade --requirement test-requirements.txt
     - pip install --no-cache --upgrade --requirement requirements.txt --extra-index-url $PYPI_URL
