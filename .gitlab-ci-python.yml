@@ -35,8 +35,8 @@ stages:
 build:
   stage: build
   before_script:
-    - pip install --no-cache --upgrade --requirement test-requirements.txt
-    - pip install --no-cache --upgrade --requirement requirements.txt --extra-index-url $PYPI_URL
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - coverage run --source=src setup.py test
     - coverage xml
