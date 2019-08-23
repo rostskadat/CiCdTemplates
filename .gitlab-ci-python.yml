@@ -37,6 +37,11 @@ build:
   before_script:
     - pip install --requirement test-requirements.txt
     - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+    # Some Python tools (Lifecycle, etc) use Maven in there unit test and 
+    #   therefore it needs to be configured (mainly pointing to the default 
+    #   repository).
+    - mkdir -p /root/.m2/repository
+    - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
   script:
     - coverage run --source=src setup.py test
     - coverage xml
