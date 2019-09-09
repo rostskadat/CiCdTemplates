@@ -23,7 +23,7 @@
 image: maven:3.3.9-jdk-8
 
 variables:
-  MAVEN_CLI_OPTS: "--settings .m2/settings.xml --activate-profiles CI_BUILD --batch-mode --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  MAVEN_CLI_OPTS: "--settings .m2/settings.xml --activate-profiles CI_BUILD --batch-mode --fail-at-end --show-version -DinstallAtEnd=true"
   #
   # The important settings here are the memory related parameter that are necesary
   #   in order for some sonar invocation not to fail with an OOM exception. The other
