@@ -51,6 +51,9 @@ build:
 
 package wheel:
   stage: package
+  before_script:
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - python setup.py bdist_wheel
   artifacts:
@@ -59,6 +62,9 @@ package wheel:
 
 package sdist:
   stage: package
+  before_script:
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - python setup.py sdist
   artifacts:
