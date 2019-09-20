@@ -7,7 +7,11 @@
 #include:
 #  - 'https://raw.githubusercontent.com/rostskadat/CiCdTemplates/master/.gitlab-ci-python.yml'
 
-# 
+#
+# In order to pull the image you need to login into the ECR registry. You can 
+#   do that periodically using a cron job, to login every 10 minutes
+# */10 * * * * root /bin/bash -c '$(aws ecr get-login --region eu-west-1 --no-include-email)'
+#
 image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
 
 # Change pip's cache directory to be inside the project directory since we can
