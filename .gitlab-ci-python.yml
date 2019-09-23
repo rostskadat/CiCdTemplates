@@ -53,6 +53,17 @@ build:
     - coverage report --show-missing
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
 
+#lint:
+#  stage: build
+#  script:
+#    - pylint src
+
+#yapf:
+#  stage: build
+#  script:
+#    - yapf --diff --recursive > .yapf
+#    - [ -s .yapf ] && exit 1 || exit 0
+
 package wheel:
   stage: package
   before_script:
@@ -75,16 +86,12 @@ package sdist:
     paths:
     - dist/*.tar.gz
 
-deploy staging:
-  stage: deploy
-  script:
-    - twine upload --repository-url $PYPI_URL dist/*
-  except:
-    - tags
-
-deploy production:
+# do not deploy feature branches...
+deploy:
   stage: deploy
   script:
     - twine upload --repository-url $PYPI_URL dist/*
   only:
+    - master
+    - develop
     - tags
