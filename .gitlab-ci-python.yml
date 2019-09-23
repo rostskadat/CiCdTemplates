@@ -88,4 +88,3 @@ deploy production:
     - twine upload --repository-url $PYPI_URL dist/*
   only:
     - tags
-  when: manual
