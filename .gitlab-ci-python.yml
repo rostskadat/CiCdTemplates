@@ -92,6 +92,5 @@ deploy:
   script:
     - twine upload --repository-url $PYPI_URL dist/*
   only:
-    - master
     - develop
     - tags
