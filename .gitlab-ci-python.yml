@@ -52,6 +52,9 @@ build:
     - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
     - coverage report --show-missing
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+  # Do not build on master (just building tags...)
+  except:
+    - master
 
 #lint:
 #  stage: build
@@ -74,6 +77,9 @@ package wheel:
   artifacts:
     paths:
     - dist/*.whl
+  # Do not build on master (just building tags...)
+  except:
+    - master
 
 package sdist:
   stage: package
@@ -85,6 +91,9 @@ package sdist:
   artifacts:
     paths:
     - dist/*.tar.gz
+  # Do not build on master (just building tags...)
+  except:
+    - master
 
 # do not deploy feature branches...
 deploy:
