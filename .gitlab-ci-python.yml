@@ -7,7 +7,11 @@
 #include:
 #  - 'https://raw.githubusercontent.com/rostskadat/CiCdTemplates/master/.gitlab-ci-python.yml'
 
-# 
+#
+# In order to pull the image you need to login into the ECR registry. You can 
+#   do that periodically using a cron job, to login every 10 minutes
+# */10 * * * * root /bin/bash -c '$(aws ecr get-login --region eu-west-1 --no-include-email)'
+#
 image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
 
 # Change pip's cache directory to be inside the project directory since we can
@@ -35,44 +39,74 @@ stages:
 build:
   stage: build
   before_script:
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install --no-cache --upgrade --requirement test-requirements.txt
-    - pip install --no-cache --upgrade --requirement requirements.txt --extra-index-url $PYPI_URL
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+    # Some Python tools (Lifecycle, etc) use Maven in there unit test and 
+    #   therefore it needs to be configured (mainly pointing to the default 
+    #   repository).
+    - mkdir -p /root/.m2/repository
+    - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
   script:
-    - coverage run --source=src setup.py test
-    - coverage xml
-    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
-    - coverage report --show-missing
+    - pytest --rootdir=tests --cov=src --ignore-glob=*/resources/projects/* --verbose -n 4
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+  # Do not build on master (just building tags...)
+  except:
+    - master
+
+sonar:
+  stage: build
+  before_script:
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+  script:
+    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
+  except:
+    - master
+
+#lint:
+#  stage: build
+#  script:
+#    - pylint src
+
+#yapf:
+#  stage: build
+#  script:
+#    - yapf --diff --recursive > .yapf
+#    - [ -s .yapf ] && exit 1 || exit 0
 
 package wheel:
   stage: package
+  before_script:
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - python setup.py bdist_wheel
   artifacts:
     paths:
     - dist/*.whl
+  # Do not build on master (just building tags...)
+  except:
+    - master
 
 package sdist:
   stage: package
+  before_script:
+    - pip install --requirement test-requirements.txt
+    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - python setup.py sdist
   artifacts:
     paths:
     - dist/*.tar.gz
-
-deploy staging:
-  stage: deploy
-  script:
-    - twine upload --repository-url $PYPI_URL dist/*
+  # Do not build on master (just building tags...)
   except:
-    - tags
+    - master
 
-deploy production:
+# do not deploy feature branches...
+deploy:
   stage: deploy
   script:
     - twine upload --repository-url $PYPI_URL dist/*
   only:
+    - develop
     - tags
-  when: manual
