@@ -46,7 +46,7 @@ build:
     #   repository).
     - mkdir -p /root/.m2/repository
     - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
-    - export PYTHONPATH=$CI_PROJECT_DIR/src:$PATHPATH:
+    - export "PYTHONPATH=$CI_PROJECT_DIR/src:$PATHPATH"
   script:
     - pytest --rootdir=tests --cov=src --ignore-glob=*/resources/projects/* --verbose -n 4
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
