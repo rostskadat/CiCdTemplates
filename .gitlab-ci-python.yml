@@ -36,7 +36,7 @@ stages:
   - package
   - deploy
 
-build:
+.shared: &build_image
   stage: build
   before_script:
     - pip install --requirement test-requirements.txt
@@ -46,23 +46,37 @@ build:
     #   repository).
     - mkdir -p /root/.m2/repository
     - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
-    - export "PYTHONPATH=$CI_PROJECT_DIR/src:/usr/lib/python3/dist-packages:$PATHPATH"
-  script:
-    - pytest --rootdir=tests --cov=src --ignore-glob=*/resources/projects/* --verbose -n 4
-  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
-  # Do not build on master (just building tags...)
+    # Needs to adjust PYTHONPATH because it does not contain src folder when not 
+    # running through setup
+    - export "PYTHONPATH=$CI_PROJECT_DIR/src:$PATHPATH"
   except:
+    # No build on master (tags will take care of that...)
     - master
 
-sonar:
-  stage: build
+.shared: &package_image
+  stage: package
   before_script:
     - pip install --requirement test-requirements.txt
     - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
-    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
+    - python setup.py $TARGET_NAME
+  artifacts:
+    paths:
+    - $TARGET_ARTIFACT
   except:
+    # No package on master (tags will take care of that...)
     - master
+
+test:
+  <<: *build_image
+  script:
+    - pytest --rootdir=tests --cov=src --ignore-glob=*/resources/projects/* --verbose -n 4
+  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
+
+sonar:
+  <<: *build_image
+  script:
+    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
 
 #lint:
 #  stage: build
@@ -76,32 +90,16 @@ sonar:
 #    - [ -s .yapf ] && exit 1 || exit 0
 
 package wheel:
-  stage: package
-  before_script:
-    - pip install --requirement test-requirements.txt
-    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
-  script:
-    - python setup.py bdist_wheel
-  artifacts:
-    paths:
-    - dist/*.whl
-  # Do not build on master (just building tags...)
-  except:
-    - master
-
+  <<: *package_image
+  variables:
+     TARGET_NAME: bdist_wheel
+     TARGET_ARTIFACT: dist/*.whl
+  
 package sdist:
-  stage: package
-  before_script:
-    - pip install --requirement test-requirements.txt
-    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
-  script:
-    - python setup.py sdist
-  artifacts:
-    paths:
-    - dist/*.tar.gz
-  # Do not build on master (just building tags...)
-  except:
-    - master
+  <<: *package_image
+  variables:
+     TARGET_NAME: sdist
+     TARGET_ARTIFACT: dist/*.tar.gz
 
 # do not deploy feature branches...
 deploy:
