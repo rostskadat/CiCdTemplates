@@ -118,7 +118,7 @@ dry-run:triage:
   script:
     - gem install gitlab-triage
     - gitlab-triage --help
-    - gitlab-triage --dry-run --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --host-url https://gitlab.afbaws.com
+    - gitlab-triage --debug --dry-run --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --host-url https://gitlab.afbaws.com
   when: manual
   except:
     - schedules
@@ -129,7 +129,7 @@ run:triage:
   stage: triage
   script:
     - gem install gitlab-triage
-    - gitlab-triage --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --host-url https://gitlab.afbaws.com
+    - gitlab-triage --debug --token $TRIAGE_API_TOKEN --source-id $CI_PROJECT_PATH --host-url https://gitlab.afbaws.com
   only:
     - schedules
   allow_failure: true
