@@ -55,7 +55,7 @@ build:
     - mvn $MAVEN_CLI_OPTS clean install
   artifacts:
     paths:
-      - target/classes**/*.class
+      - target/classes/**/*.class
     expire_in: 1 day
 
 coverage:
