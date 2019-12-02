@@ -53,6 +53,10 @@ build:
   stage: build
   script:
     - mvn $MAVEN_CLI_OPTS clean install
+  artifacts:
+    paths:
+      - target/classes
+    expire_in: 1 day
 
 coverage:
   stage: test
