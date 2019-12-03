@@ -92,7 +92,8 @@ checkstyle:
 sonar:
   stage: analysis
   script:
-    - mvn $MAVEN_CLI_OPTS -Dsonar.host=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD sonar:sonar || mvn $MAVEN_CLI_OPTS -Dsonar.host=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD sonar:sonar
+    - mvn $MAVEN_CLI_OPTS verify
+    - mvn $MAVEN_CLI_OPTS -Dsonar.host=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD sonar:sonar
   only:
     - develop
   allow_failure: true
