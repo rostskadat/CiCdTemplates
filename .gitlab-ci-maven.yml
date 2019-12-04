@@ -71,6 +71,13 @@ coverage:
       - target/jacoco.exec
     expire_in: 1 day
 
+#
+# This step is allowed to failed because some project use API class, that do
+# not actually any code (such javax/servlet/jsp/tagext/TagSupport found 
+# instance in javax:javaee-api). Took the decision to fail PMD instead of 
+# referencing a specific runtime, in order to avoid the use of non "standard"
+# API 
+#
 pmd:
   stage: test
   script:
@@ -79,6 +86,7 @@ pmd:
     paths:
       - target/pmd.xml
     expire_in: 1 day
+  allow_failure: true
 
 checkstyle:
   stage: test
@@ -96,7 +104,6 @@ sonar:
     - mvn $MAVEN_CLI_OPTS -Dsonar.host=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD sonar:sonar
   only:
     - develop
-  allow_failure: true
 
 deploy to artifactory:
   stage: deploy
