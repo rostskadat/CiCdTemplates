@@ -20,6 +20,9 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   TWINE_USERNAME: $PYPI_USERNAME
   TWINE_PASSWORD: $PYPI_PASSWORD
+  SONAR_OPTS: "-Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD"
+  SONAR_SCANNER_OPTS: "-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTP_PROXY_HOST -Dhttps.proxyPort=$HTTP_PROXY_PORT"
+
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -46,7 +49,7 @@ stages:
     #   therefore it needs to be configured (mainly pointing to the default 
     #   repository).
     - mkdir -p /root/.m2/repository
-    - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
+    - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors><proxies><proxy><id>proxy-http</id><active>true</active><protocol>http</protocol><host>${env.HTTP_PROXY_HOST}</host><port>3128</port><nonProxyHosts>localhost|127.0.0.1|*.corp|180.*|172.*</nonProxyHosts></proxy><proxy><id>proxy-https</id><active>true</active><protocol>https</protocol><host>${env.HTTP_PROXY_HOST}</host><port>3128</port><nonProxyHosts>localhost|127.0.0.1|*.corp|180.*|172.*</nonProxyHosts></proxy></proxies></settings>' > /root/.m2/settings.xml
     # Needs to adjust PYTHONPATH because it does not contain src folder when not 
     # running through setup
     - export "PYTHONPATH=$CI_PROJECT_DIR/src:$PYTHONPATH"
@@ -77,7 +80,7 @@ test:
 sonar:
   <<: *build_image
   script:
-    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
+    - sonar-scanner $SONAR_OPTS || sonar-scanner $SONAR_OPTS
 
 #lint:
 #  stage: build
