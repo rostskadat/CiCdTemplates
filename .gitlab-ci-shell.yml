@@ -14,10 +14,14 @@
 #
 image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
 
+variables:
+  SONAR_OPTS: "-Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD"
+  SONAR_SCANNER_OPTS: "-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTP_PROXY_HOST -Dhttps.proxyPort=$HTTP_PROXY_PORT"
+
 stages:
   - build
 
 build:
   stage: build
   script:
-    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD || sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD
+    - sonar-scanner $SONAR_OPTS || sonar-scanner $SONAR_OPTS
