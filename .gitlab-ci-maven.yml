@@ -23,6 +23,7 @@
 image: maven:3.3.9-jdk-8
 
 variables:
+  XDG_CACHE_HOME: /cache
   MAVEN_CLI_OPTS: "--settings .m2/settings.xml --activate-profiles CI_BUILD --batch-mode --fail-at-end --show-version -DinstallAtEnd=true"
   #
   # The important settings here are the memory related parameter that are necesary
@@ -31,18 +32,20 @@ variables:
   #   different maven artifacts
   #
   #   -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.showDateTime=true
+  # BEWARE: the -Dsonar.host parameter is different from when using 'sonar-scanner' (-Dsonar.host.url)
   SONAR_OPTS: "-Dsonar.host=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD"
-  MAVEN_OPTS: "-Xmx1536m -Xms256m -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+  MAVEN_OPTS: "-Xmx1536m -Xms256m -Dmaven.repo.local=/cache/.m2/repository -Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
   HTTP_PROXY_OPTS: "-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTP_PROXY_HOST -Dhttps.proxyPort=$HTTP_PROXY_PORT"
   
 cache:
   paths:
-    - .m2/repository
+#    - .m2/repository
     - ~/.sonar/cache
     - target
 
 before_script:
-  - mkdir -p .m2/repository
+  - mkdir -p /cache/.m2/repository
+  - mkdir -p .m2
   - echo '<?xml version="1.0" encoding="UTF-8"?><settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"><servers><server><id>AFBAWS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBRELEASES</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server><server><id>AFBSNAPSHOTS</id><username>${env.ARTIFACTORY_USERNAME}</username><password>${env.ARTIFACTORY_PASSWORD}</password></server></servers><mirrors><mirror><mirrorOf>*</mirrorOf><id>AFBAWS</id><url>${env.ARTIFACTORY_URL}/repo</url></mirror></mirrors><proxies><proxy><id>proxy-http</id><active>true</active><protocol>http</protocol><host>${env.HTTP_PROXY_HOST}</host><port>3128</port><nonProxyHosts>localhost|127.0.0.1|*.corp|180.*|172.*</nonProxyHosts></proxy><proxy><id>proxy-https</id><active>true</active><protocol>https</protocol><host>${env.HTTP_PROXY_HOST}</host><port>3128</port><nonProxyHosts>localhost|127.0.0.1|*.corp|180.*|172.*</nonProxyHosts></proxy></proxies></settings>' > .m2/settings.xml
 
 stages:

@@ -22,6 +22,7 @@ variables:
   XDG_CACHE_HOME: /cache
   TWINE_USERNAME: $PYPI_USERNAME
   TWINE_PASSWORD: $PYPI_PASSWORD
+  # BEWARE: the -Dsonar.host.url parameter is different from when using 'mvn sonar:sonar' (-Dsonar.host)
   SONAR_OPTS: "-Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD"
   SONAR_SCANNER_OPTS: "-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTP_PROXY_HOST -Dhttps.proxyPort=$HTTP_PROXY_PORT"
 
