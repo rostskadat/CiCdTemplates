@@ -17,12 +17,13 @@ image: 791682668801.dkr.ecr.eu-west-1.amazonaws.com/repo/cicd-python:latest
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
 variables:
-  #PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # NOTE that for XDG_CACHE_HOME to properly work the /etc/gitlab-runner/config.toml 
+  # must have the 'volumes = ["/cache"]'
+  XDG_CACHE_HOME: /cache
   TWINE_USERNAME: $PYPI_USERNAME
   TWINE_PASSWORD: $PYPI_PASSWORD
   SONAR_OPTS: "-Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_USERNAME -Dsonar.password=$SONAR_PASSWORD"
   SONAR_SCANNER_OPTS: "-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTP_PROXY_HOST -Dhttps.proxyPort=$HTTP_PROXY_PORT"
-  XDG_CACHE_HOME: /cache
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -31,8 +32,8 @@ variables:
 # them in a virtualenv and cache it as well.
 cache:
   paths:
-#    - .cache/pip
-    - venv/
+   - /cache/pip
+#   - /root/.m2/repository
     
 stages:
 #  - triage
