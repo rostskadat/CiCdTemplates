@@ -31,7 +31,7 @@ variables:
 # them in a virtualenv and cache it as well.
 cache:
   paths:
-#    - .cache/pip
+    - .cache/pip
     - venv/
     
 stages:
@@ -45,6 +45,7 @@ stages:
   before_script:
     - pip install --requirement test-requirements.txt
     - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+    - sudo chown -R gitlab-runner:gitlab-runner .cache
     # Some Python tools (Lifecycle, etc) use Maven in there unit test and 
     #   therefore it needs to be configured (mainly pointing to the default 
     #   repository).
@@ -62,6 +63,7 @@ stages:
   before_script:
     - pip install --requirement test-requirements.txt
     - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+    - sudo chown -R gitlab-runner:gitlab-runner .cache
   script:
     - python setup.py $TARGET_NAME
   artifacts:
