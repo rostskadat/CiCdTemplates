@@ -63,7 +63,6 @@ stages:
   before_script:
     - pip install --requirement test-requirements.txt
     - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
-    - sudo chown -R gitlab-runner:gitlab-runner .cache
   script:
     - python setup.py $TARGET_NAME
   artifacts:
