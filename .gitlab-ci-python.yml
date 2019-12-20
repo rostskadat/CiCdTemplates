@@ -61,9 +61,9 @@ stages:
 
 .shared: &package_image
   stage: package
-  before_script:
-    - pip install --requirement test-requirements.txt
-    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
+#  before_script:
+#    - pip install --requirement test-requirements.txt
+#    - pip install --requirement requirements.txt --extra-index-url $PYPI_URL
   script:
     - python setup.py $TARGET_NAME
   artifacts:
