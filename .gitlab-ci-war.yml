@@ -1,0 +1,61 @@
+#
+# FILE: .gitlab-ci-war.yml
+#
+# DESCRIPTION: this pipeline extends the maven project with deployment steps.
+#
+include:
+  - 'https://raw.githubusercontent.com/rostskadat/CiCdTemplates/master/.gitlab-ci-maven.yml'
+
+.deploy_job_template: &deploy_job_definition
+  stage: deploy
+  script:
+    - |
+      # Let's configure the ssh connection
+      mkdir -p .ssh
+      cat > .ssh/id_rsa <<EOF
+      $ID_RSA
+      EOF
+      chmod go-rwx .ssh/id_rsa
+      cat > .ssh/config <<EOF
+      Host *
+          StrictHostKeyChecking no
+      EOF
+      chmod go-rwx .ssh/config
+      scp $SRC_WAR $USERNAME@$HOSTNAME:$BASEDIR/latest/was/$DST_WAR
+      ssh $USERNAME@$HOSTNAME $DEPLOY_BIN_DIR/deploy_war.sh -w $BASEDIR/latest/was/$DST_WAR
+
+deploy to DEV4:
+  <<: *deploy_job_definition
+  variables:
+     SRC_WAR:  target/afbSecureWEB.war
+     DST_WAR:  afbSecureWEB.war
+     ID_RSA:   $DEV4_ID_RSA
+     USERNAME: $DEV4_USERNAME
+     HOSTNAME: $DEV4_WAS1
+     BASEDIR:  $DEV4_BASEDIR
+  only:
+    - develop
+
+deploy to PRE4:
+  <<: *deploy_job_definition
+  variables:
+     SRC_WAR:  target/afbSecureWEB.war
+     DST_WAR:  afbSecureWEB.war
+     ID_RSA:   $DEV4_ID_RSA
+     USERNAME: $DEV4_USERNAME
+     HOSTNAME: $DEV4_WAS1
+     BASEDIR:  $DEV4_BASEDIR
+  only:
+    - release/*
+
+deploy to PRO4:
+  <<: *deploy_job_definition
+  variables:
+     SRC_WAR:  target/afbSecureWEB.war
+     DST_WAR:  afbSecureWEB.war
+     ID_RSA:   $DEV4_ID_RSA
+     USERNAME: $DEV4_USERNAME
+     HOSTNAME: $DEV4_WAS1
+     BASEDIR:  $DEV4_BASEDIR
+  only:
+    - tags/*

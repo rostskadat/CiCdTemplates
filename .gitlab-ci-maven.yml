@@ -39,7 +39,6 @@ variables:
   
 cache:
   paths:
-#    - .m2/repository
     - ~/.sonar/cache
     - target
 
